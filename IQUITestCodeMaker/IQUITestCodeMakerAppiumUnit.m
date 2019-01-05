@@ -1,61 +1,60 @@
 //
-//  IQUITestCodeMakerJavaUnit.m
+//  IQUITestCodeMakerAppiumUnit.m
 //  IQUITestCodeMaker
 //
-//  Created by lobster on 2018/8/13.
-//  Copyright © 2018年 lobster. All rights reserved.
+//  Created by yishu.zd on 2018/12/15.
 //
 
-#import "IQUITestCodeMakerJavaUnit.h"
+#import "IQUITestCodeMakerAppiumUnit.h"
 #import "IQUITestCodeMakerCapabilities.h"
 #import "IQUITestOperationEvent.h"
 
-@implementation IQUITestCodeMakerJavaUnit
+@implementation IQUITestCodeMakerAppiumUnit
 
 - (void)produceCodeWithOperationEvent:(IQUITestOperationEvent *)op {
     [self produceTemplateCodeOnce];
     switch (op.eventType) {
-            case IQUIEventUnknown:
+        case IQUIEventUnknown:
         {
             /*未知*/
         }
             break;
-            case IQUIEventTap:
+        case IQUIEventTap:
         {
             [self produceTapCodeWithOperationEvent:op];
         }
             break;
-            case IQUIEventDoubleTap:
+        case IQUIEventDoubleTap:
         {
             
         }
             break;
-            case IQUIEventSwipe:
+        case IQUIEventSwipe:
         {
             
         }
             break;
-            case IQUIEventPinch:
+        case IQUIEventPinch:
         {
             
         }
             break;
-            case IQUIEventZoom:
+        case IQUIEventZoom:
         {
             
         }
             break;
-            case IQUIEventLongPress:
+        case IQUIEventLongPress:
         {
             
         }
             break;
-            case IQUIEventSendKey:
+        case IQUIEventSendKey:
         {
             [self produceSendKeyCodeWithOperationEvent:op];
         }
             break;
-            case IQEventEndCode:
+        case IQEventEndCode:
         {
             [self produceEndCodeOnce];
         }
@@ -71,8 +70,8 @@
     }
     self.eventIndex++;
     NSString *tapCode = [NSString stringWithFormat:@"\n\
-    MobileElement el%ld = (MobileElement) driver.findElementByAccessibilityId(\"%@\");\n\
-    el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
+           MobileElement el%ld = (MobileElement) driver.findElementByAccessibilityId(\"%@\");\n\
+           el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
     [self storeProductCode:tapCode];
 }
 
@@ -82,8 +81,8 @@
     }
     self.eventIndex++;
     NSString *sendCode = [NSString stringWithFormat:@"\n\
-    MobileElement el%ld = (MobileElement) driver.findElementByAccessibilityId(\"%@\");\n\
-    el%ld.sendKeys(\"%@\");\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
+           MobileElement el%ld = (MobileElement) driver.findElementByAccessibilityId(\"%@\");\n\
+           el%ld.sendKeys(\"%@\");\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
     [self storeProductCode:sendCode];
 }
 
@@ -101,37 +100,36 @@
         [self.eventQueue addObject:event];
     }
     NSString *code = [NSString stringWithFormat:@"\n\
-/*IQ UITest Code Maker.Rquire Appium Version(%@)*/\n\
-/*This Sample Code Uses JUnit*/\n\
-\n\
-\n\
-import io.appium.java_client.MobileElement;\n\
-import io.appium.java_client.ios.IOSDriver;\n\
-import junit.framework.TestCase;\n\
-import org.junit.After;\n\
-import org.junit.Before;\n\
-import org.junit.Test;\n\
-import java.net.MalformedURLException;\n\
-import java.net.URL;\n\
-import org.openqa.selenium.remote.DesiredCapabilities;\n\
-\n\
-public class SampleTest {\n\
-  private IOSDriver driver;\n\
-\n\
-  @Before\n\
-  public void setUp() throws MalformedURLException {\n\
-    DesiredCapabilities desiredCapabilities = new DesiredCapabilities();\n\
-    desiredCapabilities.setCapability(\"platformName\", \"%@\");\n\
-    desiredCapabilities.setCapability(\"platformVersion\", \"%@\");\n\
-    desiredCapabilities.setCapability(\"deviceName\", \"%@\");\n\
-    desiredCapabilities.setCapability(\"automationName\", \"%@\");\n\
-    desiredCapabilities.setCapability(\"app\", \"%@\");\n\
-    URL remoteUrl = new URL(\"http://%@:%@/wd/hub\");\n\
-    driver = new IOSDriver(remoteUrl, desiredCapabilities);\n\
-  }\n\
-\n\
-  @Test\n\
-  public void sampleTest() {\n", self.cap.appiumCap.appiumVersion,self.cap.appiumCap.platformName,self.cap.appiumCap.platformVersion,self.cap.appiumCap.deviceName,self.cap.appiumCap.automationName,self.cap.appiumCap.app,self.cap.appiumCap.serverAddress, self.cap.appiumCap.serverPort];
+      /*This Sample Code Uses Appium*/\n\
+      \n\
+      \n\
+      import io.appium.java_client.MobileElement;\n\
+      import io.appium.java_client.ios.IOSDriver;\n\
+      import junit.framework.TestCase;\n\
+      import org.junit.After;\n\
+      import org.junit.Before;\n\
+      import org.junit.Test;\n\
+      import java.net.MalformedURLException;\n\
+      import java.net.URL;\n\
+      import org.openqa.selenium.remote.DesiredCapabilities;\n\
+      \n\
+      public class SampleTest {\n\
+      private IOSDriver driver;\n\
+      \n\
+      @Before\n\
+      public void setUp() throws MalformedURLException {\n\
+          DesiredCapabilities desiredCapabilities = new DesiredCapabilities();\n\
+          desiredCapabilities.setCapability(\"platformName\", \"%@\");\n\
+          desiredCapabilities.setCapability(\"platformVersion\", \"%@\");\n\
+          desiredCapabilities.setCapability(\"deviceName\", \"%@\");\n\
+          desiredCapabilities.setCapability(\"automationName\", \"%@\");\n\
+          desiredCapabilities.setCapability(\"app\", \"%@\");\n\
+          URL remoteUrl = new URL(\"http://127.0.0.1:4723/wd/hub\");\n\
+          driver = new IOSDriver(remoteUrl, desiredCapabilities);\n\
+      }\n\
+      \n\
+      @Test\n\
+      public void sampleTest() {\n", self.cap.capbilities.platformName,self.cap.capbilities.platformVersion,self.cap.capbilities.deviceName,self.cap.capbilities.automationName,self.cap.capbilities.app];
     
     [[NSFileManager defaultManager] removeItemAtPath:self.scriptPath error:nil];
     [self storeProductCode:code];
@@ -151,12 +149,12 @@ public class SampleTest {\n\
         [self.eventQueue addObject:event];
     }
     NSString *code = @"\n\
-  }\n\
-\n\
-  @After\n\
-  public void tearDown() {\n\
+    }\n\
+    \n\
+    @After\n\
+    public void tearDown() {\n\
     driver.quit();\n\
-  }\n";
+    }\n";
     [self storeProductCode:code];
 }
 
@@ -173,6 +171,5 @@ public class SampleTest {\n\
     }
     self.isConverting = NO;
 }
-
 
 @end

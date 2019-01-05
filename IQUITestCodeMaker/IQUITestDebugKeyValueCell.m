@@ -24,7 +24,6 @@ static NSString *const kMobileConfigUrl = @"https://www.pgyer.com/udid";
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UITextField *textFiled;
 @property (nonatomic, strong) IQUITestDebugKVModel *kvModel;
-@property (nonatomic, strong) IQUIRightBarButton *rightBarButton;
 
 @end
 
@@ -41,7 +40,6 @@ static NSString *const kMobileConfigUrl = @"https://www.pgyer.com/udid";
     self.backgroundColor = [UIColor clearColor];
     [self.contentView addSubview:self.titleLabel];
     [self.contentView addSubview:self.textFiled];
-    [self.contentView addSubview:self.rightBarButton];
 }
 
 - (void)updateViewWithViewModel:(IQUITestDebugKVModel *)viewModel {
@@ -49,16 +47,10 @@ static NSString *const kMobileConfigUrl = @"https://www.pgyer.com/udid";
     self.titleLabel.text = viewModel.title;
     self.textFiled.placeholder = viewModel.placeholder;
     self.textFiled.text = nil;
-    if ([viewModel.title isEqualToString:@"appiumVersion"] || [viewModel.title isEqualToString:@"platformName"] || [viewModel.title isEqualToString:@"automationName"] || [viewModel.title isEqualToString:@"appiumLanguage"]) {
-        [self.textFiled setEnabled:NO];
-    } else {
+    if ([viewModel.title isEqualToString:@"waitTime"]) {
         [self.textFiled setEnabled:YES];
-    }
-    
-    if ([viewModel.title isEqualToString:@"udid"]){
-        self.rightBarButton.hidden = NO;
     } else {
-        self.rightBarButton.hidden = YES;
+        [self.textFiled setEnabled:NO];
     }
 }
 
@@ -98,14 +90,6 @@ static NSString *const kMobileConfigUrl = @"https://www.pgyer.com/udid";
     }
     return _textFiled;
 }
-- (IQUIRightBarButton *)rightBarButton {
-    if (!_rightBarButton){
-        _rightBarButton = [IQUIRightBarButton buttonWithType:UIButtonTypeDetailDisclosure];
-        _rightBarButton.hidden = YES;
-        _rightBarButton.frame = CGRectMake([[UIScreen mainScreen] bounds].size.width - 60, 2, 60, 40);
-        [_rightBarButton addTarget:self action:@selector(rightBarButtonClicked) forControlEvents:UIControlEventTouchUpInside];
-    }
-    return _rightBarButton;
-}
+
 
 @end

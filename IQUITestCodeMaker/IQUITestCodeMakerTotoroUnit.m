@@ -1,16 +1,15 @@
 //
-//  IQUITestCodeMakerJSPromiseUnit.m
-//  IQUITestCodeMaker
+//  IQUITestCodeMakerTotoroUnit.m
+//  AliyunOSSiOS
 //
-//  Created by lobster on 2018/8/9.
-//  Copyright © 2018年 lobster. All rights reserved.
+//  Created by yishu.zd on 2018/12/15.
 //
 
-#import "IQUITestCodeMakerJSPromiseUnit.h"
+#import "IQUITestCodeMakerTotoroUnit.h"
 #import "IQUITestCodeMakerCapabilities.h"
 #import "IQUITestOperationEvent.h"
 
-@implementation IQUITestCodeMakerJSPromiseUnit
+@implementation IQUITestCodeMakerTotoroUnit
 
 - (void)produceCodeWithOperationEvent:(IQUITestOperationEvent *)op {
     [self produceTemplateCodeOnce];
@@ -55,7 +54,6 @@
             [self produceSendKeyCodeWithOperationEvent:op];
         }
             break;
-            
         case IQEventEndCode:
         {
             [self produceEndCodeOnce];
@@ -72,8 +70,8 @@
     }
     self.eventIndex++;
     NSString *tapCode = [NSString stringWithFormat:@"\n\
-  let el%ld = await driver.elementByAccessibilityId(\"%@\");\n\
-  await el%ld.click()\n",self.eventIndex,op.identifier,self.eventIndex];
+         WebElement el%ld = driver.findElementByAccessibilityId(\"%@\");\n\
+         el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
     [self storeProductCode:tapCode];
 }
 
@@ -82,10 +80,10 @@
         [self.eventQueue addObject:op];
     }
     self.eventIndex++;
-    NSString *sendKeyCode = [NSString stringWithFormat:@"\n\
-  let el%ld = await driver.elementByAccessibilityId(\"%@\");\n\
-  await el%ld.type(\"%@\")\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
-    [self storeProductCode:sendKeyCode];
+    NSString *sendCode = [NSString stringWithFormat:@"\n\
+        WebElement el%ld = driver.findElementByAccessibilityId(\"%@\");\n\
+        el%ld.sendKeys(\"%@\");\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
+    [self storeProductCode:sendCode];
 }
 
 - (void)produceTemplateCodeOnce {
@@ -102,22 +100,29 @@
         [self.eventQueue addObject:event];
     }
     NSString *code = [NSString stringWithFormat:@"\n\
-/*IQ UITest Code Maker.Rquire Appium Version(%@)*/\n\
-/*This Sample Code Uses admc/wd Client Library*/\n\
-/*Install It With Cmd 'npm install wd'*/\n\
-\n\
-\n\
-const wd = require('wd');\n\
-const caps = {\"platformName\":\"%@\",\"platformVersion\":\"%@\",\"deviceName\":\"%@\",\"automationName\":\"%@\",\"app\":\"%@\"};\n ",
-                      self.cap.appiumCap.appiumVersion,self.cap.appiumCap.platformName,self.cap.appiumCap.platformVersion,self.cap.appiumCap.deviceName,self.cap.appiumCap.automationName,self.cap.appiumCap.app];
-    
-    code = [code stringByAppendingFormat:@"\n\
-\n\
-const driver = wd.promiseChainRemote(\"http://%@:%@/wd/hub\");\n\
-\n\
-\n\
-async function main () {\n\
-  await driver.init(caps);", self.cap.appiumCap.serverAddress, self.cap.appiumCap.serverPort];
+      /*This Sample Code Uses Totoro*/\n\
+      \n\
+      \n\
+      import com.alipay.auto.common.BaseCase;\n\
+      import com.alipay.auto.common.CaseInfo;\n\
+      import com.totoro.client.utils.Capability;\n\
+      import org.junit.Test;\n\
+      import org.openqa.selenium.WebElement;\n\
+      import org.openqa.selenium.remote.DesiredCapabilities;\n\
+      \n\
+      public class SampleTest extends BaseCase{\n\
+      \n\
+      @Override\n\
+      public void setCapabilities(){\n\
+          DesiredCapabilities capabilities = new DesiredCapabilities();\n\
+          capabilities.setCapability(Capability.DEVICEID, \"\");\n\
+          capabilities.setCapability(Capability.PLATFORM, \"ios\");\n\
+          capabilities.setCapability(Capability.PACKAGE, \"%@\");\n\
+          setCustomCapabilities(capabilities);\n\
+      }\n\
+      \n\
+      @Test\n\
+      public void sampleTest() {\n", self.cap.capbilities.app];
     
     [[NSFileManager defaultManager] removeItemAtPath:self.scriptPath error:nil];
     [self storeProductCode:code];
@@ -137,9 +142,12 @@ async function main () {\n\
         [self.eventQueue addObject:event];
     }
     NSString *code = @"\n\
-  await driver.quit();\n\
-}\n\
-main().catch(console.log);\n";
+    }\n\
+    \n\
+    @After\n\
+    public void tearDown() {\n\
+        driver.quit();\n\
+    }\n";
     [self storeProductCode:code];
 }
 

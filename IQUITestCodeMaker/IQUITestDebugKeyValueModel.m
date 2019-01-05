@@ -9,7 +9,7 @@
 #import "IQUITestDebugKeyValueModel.h"
 #import "IQUITestCodeMakerGenerator.h"
 
-@class IQAppiumCapabilities;
+@class IQCapabilities;
 
 static NSString *const kCapabilitiesKey = @"kCapabilitiesKey";
 

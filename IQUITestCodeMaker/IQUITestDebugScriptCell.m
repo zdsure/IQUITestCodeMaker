@@ -53,7 +53,7 @@
     self.sciptModel = model;
     
     IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
-    NSInteger selectIndex = [self.itemsArray indexOfObject:persistent.factory.cap.appiumCap.appiumLanguage];
+    NSInteger selectIndex = [self.itemsArray indexOfObject:persistent.factory.cap.capbilities.language];
     self.segmentControl.selectedSegmentIndex = selectIndex;
     
     NSString *script = [NSString stringWithContentsOfFile:persistent.factory.scriptPath encoding:NSUTF8StringEncoding error:NULL];
@@ -107,7 +107,7 @@
 
 - (NSArray *)itemsArray {
     if (!_itemsArray) {
-        _itemsArray = @[@"Ruby",@"Python",@"JSWdio",@"JSPromise",@"Java"];
+        _itemsArray = @[@"Totoro",@"Appium"];
     }
     return _itemsArray;
 }

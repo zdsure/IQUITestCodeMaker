@@ -254,7 +254,7 @@
         _dismissButton = [IQUITestDebugDismissButton buttonWithType:UIButtonTypeCustom];
         _dismissButton.frame = CGRectMake(12, 60, [[UIScreen mainScreen] bounds].size.width - 24, 60);
         [_dismissButton addTarget:self action:@selector(dismissDebugView) forControlEvents:UIControlEventTouchUpInside];
-        [_dismissButton setTitle:@"🤪 Tap me to dismiss the Debug View 🤪" forState:UIControlStateNormal];
+        [_dismissButton setTitle:@"===Tap me to dismiss the Debug View===" forState:UIControlStateNormal];
         [_dismissButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         _dismissButton.titleLabel.font = [UIFont fontWithName:@"MarkerFelt-Thin" size:20];
         _dismissButton.titleLabel.adjustsFontSizeToFitWidth = YES;

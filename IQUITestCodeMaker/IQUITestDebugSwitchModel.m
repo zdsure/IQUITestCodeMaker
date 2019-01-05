@@ -21,7 +21,7 @@
 
 + (IQUITestDebugSwitchModel *)viewModelWithState:(BOOL)state {
     IQUITestDebugSwitchModel *model = [[IQUITestDebugSwitchModel alloc]init];
-    model.title = @"重新开启录制会清除上次缓存脚本";
+    model.title = @"关闭按钮结束录制(重开会清空脚本)";
     IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
     IQUITestOperationEvent *op = persistent.factory.eventQueue.lastObject;
     if (op && (op.eventType != IQEventEndCode)) {

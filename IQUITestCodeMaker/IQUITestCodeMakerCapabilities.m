@@ -16,41 +16,37 @@ static NSString *const kCapabilitiesKey = @"kCapabilitiesKey";
 
 - (instancetype)init {
     if (self = [super init]) {
-        _driverType = IQUITestDriverAppium;
-        /*
-         1.本地有则取本地的cap。
-         2.本地没有则用默认的。
-         */
+//        IQCapabilities *cap = [IQCapabilities new];
+//        self.capbilities  = cap;
         
         NSDictionary *localCapDic = [[NSUserDefaults standardUserDefaults] objectForKey:kCapabilitiesKey];
         if (localCapDic) {
-            IQAppiumCapabilities *localCap = [IQAppiumCapabilities new];
+            IQCapabilities *localCap = [IQCapabilities new];
             for (NSString *key in localCapDic.allKeys) {
                 [localCap setValue:localCapDic[key] forKey:key];
             }
-            self.appiumCap = localCap;
+            self.capbilities = localCap;
         } else {
-            IQAppiumCapabilities *cap = [IQAppiumCapabilities new];
-            self.appiumCap  = cap;
+            IQCapabilities *cap = [IQCapabilities new];
+            self.capbilities  = cap;
         }
-        _macacaCap  = nil;
     }
     return self;
 }
 
-- (void)setAppiumCap:(IQAppiumCapabilities *)appiumCap {
-    if (appiumCap) {
-        _appiumCap = appiumCap;
+- (void)setCapbilities:(IQCapabilities *)capbilities {
+    if (capbilities) {
+        _capbilities = capbilities;
     }
     /*更新本地缓存
      1.将model转换成NSDictonary存入本地。
      */
-    NSDictionary *cacheCap = [self convertModelToDict:_appiumCap];
+    NSDictionary *cacheCap = [self convertModelToDict:_capbilities];
     [[NSUserDefaults standardUserDefaults] setObject:cacheCap forKey:kCapabilitiesKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-+ (NSDictionary *)appiumCapFromCache {
++ (NSDictionary *)capbilitiesFromCache {
     NSDictionary *localCapDic = [[NSUserDefaults standardUserDefaults] objectForKey:kCapabilitiesKey];
     return localCapDic;
 }
@@ -73,32 +69,23 @@ static NSString *const kCapabilitiesKey = @"kCapabilitiesKey";
 
 @end
 
-@implementation IQAppiumCapabilities : NSObject
+@implementation IQCapabilities : NSObject
 
 - (instancetype)init {
     if (self = [super init]) {
-        _appiumVersion      = @"1.8.1";
         _platformName       = @"iOS";
         _platformVersion    = [UIDevice currentDevice].systemVersion;
-        _deviceName         = @"iPhone X";
-        _udid               = @"";
-        NSString *bundleName = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"];
-        _app                = [NSString stringWithFormat:@"/Users/lobster/Desktop/%@.app",bundleName];
-        _serverAddress      = @"127.0.0.1";
-        _serverPort         = @"4723";
-        _appiumLanguage     = @"Ruby";
-        _autoAcceptAlerts   = @"1";
-        _showIOSLog         = @"0";
-        _interKeyDelay      = @"0";
-        _waitTime           = @"10";
+        _deviceName         = [UIDevice currentDevice].name;
+        _udid               = [[UIDevice currentDevice] identifierForVendor].UUIDString;
+        _app                = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+        _language           = @"Totoro";
+        _waitTime           = @"1";
         _automationName     = @"XCUITest";
     }
     return self;
+    
 }
 
 @end
 
-@implementation IQMacacaCapabilities : NSObject
 
-
-@end

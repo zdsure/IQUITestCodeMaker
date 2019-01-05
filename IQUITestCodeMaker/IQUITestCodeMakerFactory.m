@@ -22,13 +22,8 @@
 
 + (NSDictionary *)unitStructureMap {
     NSDictionary *unitStruct = @{
-                                 @"Ruby"        :@"IQUITestCodeMakerRubyUnit",
-                                 @"Python"      :@"IQUITestCodeMakerPythonUnit",
-                                 @"JSWdio"      :@"IQUITestCodeMakerJSWDUnit",
-                                 @"JSPromise"   :@"IQUITestCodeMakerJSPromiseUnit",
-                                 @"Java"        :@"IQUITestCodeMakerJavaUnit",
-                                 @"OC"          :@"IQUITestCodeMakerOCUnit",
-                                 @"Swift"       :@"IQUITestCodeMakerSwiftUnit"
+                                 @"Totoro"      :@"IQUITestCodeMakerTotoroUnit",
+                                 @"Appium"      :@"IQUITestCodeMakerAppiumUnit"
                                  };
     return unitStruct;
 }
@@ -39,12 +34,7 @@
 
 + (IQUITestCodeMakerFactory *)handleTaskUnitWithCap:(IQUITestCodeMakerCapabilities *)cap {
     NSDictionary *unitMap = [self unitStructureMap];
-    NSString *unitString = @"";
-    if (cap.driverType == 0) {
-        unitString = unitMap[cap.appiumCap.appiumLanguage];
-    } else {
-        unitString = unitMap[cap.macacaCap.macacaLanguage];
-    }
+    NSString *unitString = unitMap[cap.capbilities.language];
     IQUITestCodeMakerFactory *unit = [[NSClassFromString(unitString) alloc]init];
     unit.cap = cap;
     unit.eventQueue = [NSMutableArray array];
@@ -86,8 +76,8 @@
         if (![[NSFileManager defaultManager] fileExistsAtPath:scriptDir]) {
             [[NSFileManager defaultManager] createDirectoryAtPath:scriptDir withIntermediateDirectories:YES attributes:nil error:nil];
         }
-        NSString *suffix = [self suffix];
-        _scriptPath = [scriptDir stringByAppendingPathComponent:[NSString stringWithFormat:@"scriptCode.%@",suffix]];
+        //NSString *suffix = [self suffix];
+        _scriptPath = [scriptDir stringByAppendingPathComponent:[NSString stringWithFormat:@"scriptCode.%@",@"java"]];
         NSLog(@"scriptCode.rb:%@",_scriptPath);
     }
     return _scriptPath;
@@ -100,21 +90,5 @@
     return _semaphore;
 }
 
-- (NSString *)suffix {
-    NSDictionary *suffixMap = @{
-                                @"Ruby"     :@"rb",
-                                @"Python"   :@"py",
-                                @"JSWdio"   :@"js",
-                                @"JSPromise":@"js",
-                                @"Java"     :@"java",
-                                };
-    NSString *suf = nil;
-    if (self.cap.driverType == 0) {
-        suf = suffixMap[self.cap.appiumCap.appiumLanguage];
-    } else {
-        suf = suffixMap[self.cap.macacaCap.macacaLanguage];
-    }
-    return suf;
-}
 
 @end

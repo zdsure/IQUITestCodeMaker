@@ -279,18 +279,64 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     
 }
 
-- (void)IQ_delegateMethodWithFirstArg:(id)arg,... NS_REQUIRES_NIL_TERMINATION {
+//- (void)IQ_delegateMethodWithFirstArg:(id)arg,... NS_REQUIRES_NIL_TERMINATION {
+//    NSMutableArray *array = [NSMutableArray array];
+//    if (arg){
+//        va_list args;
+//        id cusorObj;
+//        va_start(args, arg);
+//        while((cusorObj = va_arg(args, id))) {
+//            [array addObject:cusorObj];
+//        }
+//        va_end(args);
+//    }
+//
+//    switch (array.count) {
+//        case 0:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:nil];
+//        }
+//            break;
+//        case 1:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:array[0],nil];
+//        }
+//            break;
+//        case 2:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:array[0],array[1],nil];
+//        }
+//            break;
+//        case 3:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],nil];
+//        }
+//            break;
+//        case 4:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],array[3],nil];
+//        }
+//            break;
+//        case 5:
+//        {
+//            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],array[3],array[4],nil];
+//        }
+//            break;
+//
+//        default:
+//            break;
+//    }
+//
+//    id target = self;
+//
+//    IQTapTask(target);
+//}
+
+- (void)IQ_delegateMethodWithFirstArg:(id)arg {
     NSMutableArray *array = [NSMutableArray array];
     if (arg){
-        va_list args;
-        id cusorObj;
-        va_start(args, arg);
-        while((cusorObj = va_arg(args, id))) {
-            [array addObject:cusorObj];
-        }
-        va_end(args);
+        [array addObject:arg];
     }
-    
     switch (array.count) {
         case 0:
         {
@@ -299,40 +345,15 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
             break;
         case 1:
         {
-            [self IQ_delegateMethodWithFirstArg:array[0],nil];
+            [self IQ_delegateMethodWithFirstArg:array[0]];
         }
-            break;
-        case 2:
-        {
-            [self IQ_delegateMethodWithFirstArg:array[0],array[1],nil];
-        }
-            break;
-        case 3:
-        {
-            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],nil];
-        }
-            break;
-        case 4:
-        {
-            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],array[3],nil];
-        }
-            break;
-        case 5:
-        {
-            [self IQ_delegateMethodWithFirstArg:array[0],array[1],array[2],array[3],array[4],nil];
-        }
-            break;
-            
-        default:
-            break;
     }
-    
+
     id target = self;
     
     IQTapTask(target);
     
 }
-
 
 @end
 
@@ -342,7 +363,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 + (void)IQHook {
     IQRuntimeMethodExchange([UIImage class], @selector(imageNamed:), @selector(IQ_imageNamed:));
     IQRuntimeMethodExchange([UIImage class], @selector(imageWithContentsOfFile:), @selector(IQ_imageWithContentsOfFile:));
-    IQRuntimeMethodExchange([UIImage class], @selector(accessibilityIdentifier), @selector(IQ_accessibilityIdentifier));
+//    IQRuntimeMethodExchange([UIImage class], @selector(accessibilityIdentifier), @selector(IQ_accessibilityIdentifier));
 }
 
 + (UIImage *)IQ_imageNamed:(NSString *)imageName{
@@ -420,7 +441,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 @implementation UIView (IQRunTimeHook)
 
 + (void)IQHook {
-    IQRuntimeMethodExchange([UIView class], @selector(accessibilityIdentifier), @selector(IQ_accessibilityIdentifier));
+//    IQRuntimeMethodExchange([UIView class], @selector(accessibilityIdentifier), @selector(IQ_accessibilityIdentifier));
     IQRuntimeMethodExchange([UIView class], @selector(addGestureRecognizer:), @selector(IQ_addGestureRecognizer:));
 #warning has problem !!! fix me !!!
     ImplementTouchMethodsIfNeeded([UIView class], @selector(touchesBegan:withEvent:));
@@ -537,11 +558,11 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         return;
     }
     
-    if ([self IQ_accessibilityIdentifier]) {
-        /*若已经设置了id则return掉，此处可能有隐患（已经设置id的情况是addSubView在addGestureRecognizer之前）
-         UIButton等一些控件内部也会调用这个方法*/
-        return;
-    }
+//    if ([self IQ_accessibilityIdentifier]) {
+//        /*若已经设置了id则return掉，此处可能有隐患（已经设置id的情况是addSubView在addGestureRecognizer之前）
+//         UIButton等一些控件内部也会调用这个方法*/
+//        return;
+//    }
     NSLog(@"addGestureRecognizer========>%@",NSStringFromClass([self class]));
     
     /*此处仍然有问题：假如有三个UIImageView都添加了点击手势，而且是通过动态添加到一个父类里面，其id都成一样的了
@@ -872,19 +893,16 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 }
 
 - (void)handleConvertTaskWithIdentifier:(NSString *)identifier {
+    
     if (identifier) {
         NSDictionary *localCap = [[NSUserDefaults standardUserDefaults] objectForKey:kCapabilitiesKey];
         NSMutableDictionary *mutaleCap = [NSMutableDictionary dictionaryWithDictionary:localCap];
-        [mutaleCap setValue:identifier forKey:@"appiumLanguage"];
+        [mutaleCap setValue:identifier forKey:@"language"];
         [[NSUserDefaults standardUserDefaults] setObject:mutaleCap forKey:kCapabilitiesKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
-    IQUITestCodeMakerCapabilities *capInstance = [[IQUITestCodeMakerCapabilities alloc]init];
-    capInstance.driverType = IQUITestDriverAppium;
-    
     IQUITestCodeMakerCapabilities *cap = [[IQUITestCodeMakerCapabilities alloc]init];
-    cap.driverType = IQUITestDriverAppium;
     
     [self removeAllScript];
     
@@ -910,11 +928,8 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         /*开启，移除本地脚本缓存*/
         [self removeAllScript];
         
-        IQUITestCodeMakerCapabilities *capInstance = [[IQUITestCodeMakerCapabilities alloc]init];
-        capInstance.driverType = IQUITestDriverAppium;
-        
         IQUITestCodeMakerCapabilities *cap = [[IQUITestCodeMakerCapabilities alloc]init];
-        cap.driverType = IQUITestDriverAppium;
+//        cap.driverType = IQUITestDriverAppium;
         
         IQUITestCodeMakerFactory *factory = [IQUITestCodeMakerFactory handleTaskUnitWithCap:cap];
         self.factory = factory;
