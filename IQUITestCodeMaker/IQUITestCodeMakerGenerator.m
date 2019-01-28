@@ -51,6 +51,18 @@ void IQTapTaskWithLocation(CGPoint point) {
     [persistent.factory produceCodeWithOperationEvent:op];
 }
 
+void IQScrollTask(CGPoint pStart, CGPoint pEnd) {
+    IQUITestOperationEvent *op = [IQUITestOperationEvent new];
+    op.locateStrategy = IQElementLocateByCoordinate;
+    op.eventType = IQUIEventSwipe;
+    op.touchPoint = pStart;
+    op.touchEndPoint = pEnd;
+    
+    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    [persistent.factory produceCodeWithOperationEvent:op];
+}
+
+
 void IQSendKeyTask(id target) {
     IQUITestOperationEvent *op = [IQUITestOperationEvent new];
     op.eventType = IQUIEventSendKey;
@@ -707,6 +719,49 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 
 @end
 
+#pragma mark--UIScrollView--
+@implementation UIScrollView (IQRunTimeHook)
+
++ (void)IQHook {
+    IQRuntimeMethodExchange([UIScrollView class],@selector(setDelegate:),@selector(IQ_setDelegate:));
+}
+
+- (void)IQ_setDelegate:(id<UIScrollViewDelegate>)delegate {
+    [self IQ_setDelegate:delegate];
+    
+    if (DebugView(NSStringFromClass([self class]))) {
+        return;
+    }
+    
+    Method originMethod = class_getInstanceMethod([delegate class], @selector(scrollViewDidEndDecelerating:));
+    IMP originImp = method_getImplementation(originMethod);
+    
+    Method currentMethod = class_getInstanceMethod([self class], @selector(IQ_scrollViewDidEndDecelerating:));
+    IMP currentImp = method_getImplementation(currentMethod);
+    
+    class_addMethod([delegate class], @selector(IQ_scrollViewDidEndDecelerating:), currentImp, method_getTypeEncoding(currentMethod));
+    
+    BOOL didAddMethod = class_addMethod([delegate class], @selector(scrollViewDidEndDecelerating:), currentImp, method_getTypeEncoding(currentMethod));
+    
+    if (didAddMethod) {
+        class_replaceMethod([delegate class], @selector(IQ_scrollViewDidEndDecelerating:), originImp, method_getTypeEncoding(originMethod));
+    } else {
+        IQRuntimeMethodExchange([delegate class], @selector(tableView:cellForRowAtIndexPath:), @selector(IQ_scrollViewDidEndDecelerating:));
+    }
+}
+
+- (void)IQ_scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self IQ_scrollViewDidEndDecelerating:scrollView];
+    // 停止类型1、停止类型2
+    BOOL scrollToScrollStop = !scrollView.tracking && !scrollView.dragging && !scrollView.decelerating;
+    if (scrollToScrollStop) {
+        [scrollView contentOffset];
+        
+    }
+}
+
+@end
+
 #pragma mark--UICollectionView--
 
 @implementation UICollectionView (IQRunTimeHook)
@@ -866,9 +921,10 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     [UICollectionView IQHook];
     [UIGestureRecognizer IQHook];
     [UIView IQHook];
-    [UIImage IQHook];
+//    [UIImage IQHook];
     [UINavigationController IQHook];
     [UITextField IQHook];
+    [UIScrollView IQHook];
 }
 
 - (void)handleApplicationWillResignActiveNotification {
