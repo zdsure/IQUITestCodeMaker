@@ -35,6 +35,7 @@ typedef NS_ENUM(NSInteger,IQElementLocateStrategy ) {
 @property (nonatomic, copy)   NSString *identifier;
 @property (nonatomic, copy)   NSString *value;
 @property (nonatomic, assign) CGPoint touchPoint;
-@property (nonatomic, assign) CGPoint touchEndPoint;
+@property (nonatomic, assign) CGPoint touchesBegan;
+@property (nonatomic, assign) CGPoint touchesEnded;
 
 @end

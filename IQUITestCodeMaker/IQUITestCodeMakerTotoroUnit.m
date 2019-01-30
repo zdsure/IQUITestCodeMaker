@@ -31,7 +31,7 @@
             break;
         case IQUIEventSwipe:
         {
-            
+            [self produceSwipeCodeWithOperationEvent:op];
         }
             break;
         case IQUIEventPinch:
@@ -73,6 +73,17 @@
          WebElement el%ld = driver.findElementByAccessibilityId(\"%@\");\n\
          el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
     [self storeProductCode:tapCode];
+}
+    
+- (void)produceSwipeCodeWithOperationEvent:(IQUITestOperationEvent *)op {
+    if (!self.isConverting) {
+        [self.eventQueue addObject:op];
+    }
+    self.eventIndex++;
+    NSString *swipeCode = [NSString stringWithFormat:@"\n\
+                         driver.findElementByAccessibilityId(\"%@\");\n\
+                         el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
+    [self storeProductCode:swipeCode];
 }
 
 - (void)produceSendKeyCodeWithOperationEvent:(IQUITestOperationEvent *)op {
