@@ -155,13 +155,14 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 }
 
 - (void)IQ_setDelegate:(id<UITextFieldDelegate>)delegate {
+    
     [self IQ_setDelegate:delegate];
+    
     
     if (DebugView(NSStringFromClass([self class]))) {
         return;
     }
     
-    /*hook @selector(tableView:cellForRowAtIndexPath:)*/
     if (![delegate respondsToSelector:@selector(textFieldDidEndEditing:)]) {
         return;
     }
@@ -200,17 +201,17 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 //
 //- (BOOL)IQ_navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item {
 //    BOOL ret = [self IQ_navigationBar:navigationBar shouldPopItem:item];
-//    
+//
 //#warning 系统自带导航需要在此截获事件
 //    UINavigationItem *backItem = navigationBar.backItem;
-//    
+//
 //    IQUITestOperationEvent *op = [IQUITestOperationEvent new];
 //    op.eventType = IQUIEventTap;
 //    op.identifier= backItem.title;
-//    
+//
 //    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
 //    [persistent.factory produceCodeWithOperationEvent:op];
-//    
+//
 //    return ret;
 //}
 
@@ -730,16 +731,16 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     IQRuntimeMethodExchange([UIScrollView class],@selector(setDelegate:),@selector(IQ_setDelegate:));
 }
 
-- (void)setPstart:(CGPoint)pstart
-{
-    objc_setAssociatedObject(self, @selector(pstart), @(pstart), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    
-}
-- (CGPoint)pstart
-{
-   NSValue *value = objc_getAssociatedObject(self, @selector(pstart));
-   return [value CGPointValue];
-}
+//- (void)setPstart:(CGPoint)pstart
+//{
+//    objc_setAssociatedObject(self, @selector(pstart), @(pstart), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+//    
+//}
+//- (CGPoint)pstart
+//{
+//   NSValue *value = objc_getAssociatedObject(self, @selector(pstart));
+//   return [value CGPointValue];
+//}
     
 - (void)IQ_setDelegate:(id<UIScrollViewDelegate>)delegate {
     //避免业务代码里重复设置
@@ -760,6 +761,15 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     
     if (![delegate respondsToSelector:@selector(scrollViewWillBeginDragging:)]) {
         return;
+    }
+    
+    if (delegate) {
+        if ([[IQUITestCodeMakerGenerator sharePersistent].hashTable containsObject:(delegate.class)]) {
+            [self IQ_setDelegate:delegate];
+            return;
+        } else {
+            [[IQUITestCodeMakerGenerator sharePersistent].hashTable addObject:(delegate.class)];
+        }
     }
     
     Method originMethod = class_getInstanceMethod([delegate class], @selector(scrollViewWillBeginDragging:));
@@ -950,7 +960,15 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         return ret;
     }
     
+    if ([NSStringFromSelector(action) isEqualToString:@"sendNext:"]) {
+        return ret;
+    }
     IQTapTask(sender);
+    
+//    if ([NSStringFromSelector(action) isEqualToString:@"rac_commandPerformAction:"]) {
+//        return ret;
+//    }
+    
     return ret;
 }
 
@@ -1103,6 +1121,13 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         [_webServer addGETHandlerForPath:@"/" filePath:self.factory.scriptPath isAttachment:NO cacheAge:2 allowRangeRequests:YES];
     }
     return _webServer;
+}
+    
+- (NSHashTable *)hashTable {
+    if (_hashTable == nil) {
+        _hashTable = [NSHashTable weakObjectsHashTable];
+    }
+    return _hashTable;
 }
 
 @end

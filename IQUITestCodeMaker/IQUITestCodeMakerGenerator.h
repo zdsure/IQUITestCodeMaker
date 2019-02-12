@@ -17,6 +17,7 @@ void IQRuntimeMethodExchange(Class aClass, SEL oldSEL, SEL newSEL);
 
 @property (nonatomic, strong, readonly) IQUITestCodeMakerFactory *factory;
 @property (nonatomic, strong, readonly) GCDWebServer *webServer;
+@property (nonatomic, strong) NSHashTable *hashTable;
 
 + (instancetype)sharePersistent;
 - (void)hook;

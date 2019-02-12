@@ -81,8 +81,10 @@
     }
     self.eventIndex++;
     NSString *swipeCode = [NSString stringWithFormat:@"\n\
-                         driver.findElementByAccessibilityId(\"%@\");\n\
-                         el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
+         driver.drag(%f,%f,%f,%f);\n",
+         op.touchesBegan.x ,op.touchesBegan.y,op.touchesEnded.x,op.touchesEnded.y];
+//    NSString *swipeCode = [NSString stringWithFormat:@"\n\
+//                           driver.drag();\n"];
     [self storeProductCode:swipeCode];
 }
 
