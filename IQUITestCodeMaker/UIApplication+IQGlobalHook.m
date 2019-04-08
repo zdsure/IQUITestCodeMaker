@@ -7,7 +7,9 @@
 //
 
 #import "UIApplication+IQGlobalHook.h"
-#import "IQUITestCodeMakerGenerator.h"
+//#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
+#import "IQUITestCodeMakerService.h"
 #import "IQUITestCodeMaker.h"
 #import "IQUITestProtocol.h"
 #import "GCDWebServer.h"
@@ -19,7 +21,8 @@
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+//        IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+        IQUITestCodeMakerService *persistent = [IQUITestCodeMakerService sharePersistent];
         [persistent hook];
         /*start web server*/
         if ([persistent.webServer start]) {

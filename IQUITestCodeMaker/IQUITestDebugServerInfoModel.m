@@ -7,7 +7,8 @@
 //
 
 #import "IQUITestDebugServerInfoModel.h"
-#import "IQUITestCodeMakerGenerator.h"
+//#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
 #import "GCDWebServer.h"
 
 @interface IQUITestDebugServerInfoModel ()
@@ -20,7 +21,7 @@
 
 + (IQUITestDebugServerInfoModel *)viewModelWithServer:(id)server {
     IQUITestDebugServerInfoModel *infoModel = [[IQUITestDebugServerInfoModel alloc]init];
-    infoModel.serverUrl = [IQUITestCodeMakerGenerator sharePersistent].webServer.serverURL.absoluteString;
+    infoModel.serverUrl = [IQUITestCodeMakerService sharePersistent].webServer.serverURL.absoluteString;
     return infoModel;
 }
 

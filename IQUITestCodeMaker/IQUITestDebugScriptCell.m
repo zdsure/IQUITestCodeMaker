@@ -8,7 +8,8 @@
 
 #import "IQUITestDebugScriptCell.h"
 #import "IQUITestDebugScriptModel.h"
-#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
+//#import "IQUITestCodeMakerGenerator.h"
 #import "IQUITestCodeMakerFactory.h"
 #import "IQUITestCodeMakerCapabilities.h"
 
@@ -52,7 +53,7 @@
 - (void)updateViewWithViewModel:(IQUITestDebugScriptModel *)model {
     self.sciptModel = model;
     
-    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    IQUITestCodeMakerService *persistent = [IQUITestCodeMakerService sharePersistent];
     NSInteger selectIndex = [self.itemsArray indexOfObject:persistent.factory.cap.capbilities.language];
     self.segmentControl.selectedSegmentIndex = selectIndex;
     
@@ -77,7 +78,7 @@
 }
 
 - (void)reloadCodeText {
-    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    IQUITestCodeMakerService *persistent = [IQUITestCodeMakerService sharePersistent];
     NSString *script = [NSString stringWithContentsOfFile:persistent.factory.scriptPath encoding:NSUTF8StringEncoding error:NULL];
     self.codeText.text = script;
 }

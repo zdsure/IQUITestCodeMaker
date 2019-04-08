@@ -14,7 +14,8 @@
 #import "IQUITestDebugKeyValueCell.h"
 #import "IQUITestDebugSwitchCell.h"
 #import "IQUITestDebugScriptCell.h"
-#import "IQUITestCodeMakerGenerator.h"
+//#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
 #import "IQUITestDebugServerInfoCell.h"
 
 @interface IQUITestDebugDismissButton : UIButton

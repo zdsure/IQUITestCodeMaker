@@ -47,11 +47,12 @@ static NSString *const kMobileConfigUrl = @"https://www.pgyer.com/udid";
     self.titleLabel.text = viewModel.title;
     self.textFiled.placeholder = viewModel.placeholder;
     self.textFiled.text = nil;
-    if ([viewModel.title isEqualToString:@"waitTime"]) {
-        [self.textFiled setEnabled:YES];
-    } else {
-        [self.textFiled setEnabled:NO];
-    }
+    [self.textFiled setEnabled:NO];
+//    if ([viewModel.title isEqualToString:@"waitTime"]) {
+//        [self.textFiled setEnabled:YES];
+//    } else {
+//        [self.textFiled setEnabled:NO];
+//    }
 }
 
 - (void)rightBarButtonClicked {

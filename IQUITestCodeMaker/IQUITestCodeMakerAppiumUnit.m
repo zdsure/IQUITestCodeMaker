@@ -31,7 +31,7 @@
             break;
         case IQUIEventSwipe:
         {
-            
+            [self produceSwipeCodeWithOperationEvent:op];
         }
             break;
         case IQUIEventPinch:
@@ -84,6 +84,36 @@
            MobileElement el%ld = (MobileElement) driver.findElementByAccessibilityId(\"%@\");\n\
            el%ld.sendKeys(\"%@\");\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
     [self storeProductCode:sendCode];
+}
+
+- (void)produceSwipeCodeWithOperationEvent:(IQUITestOperationEvent *)op {
+    if (!self.isConverting) {
+        [self.eventQueue addObject:op];
+    }
+    self.eventIndex++;
+    NSString *swipeCodeY = @"";
+    if(op.touchesEnded.y - op.touchesBegan.y >0){
+        //手指至下往上滑动
+        swipeCodeY =[NSString stringWithFormat:@"\n\
+         driver.scrollUp();\n"];
+    }else if(op.touchesEnded.y - op.touchesBegan.y < 0){
+        //手指至上往下滑动
+        swipeCodeY =[NSString stringWithFormat:@"\n\
+         driver.scrollDown();\n"];
+    }
+    [self storeProductCode:swipeCodeY];
+    
+    NSString *swipeCodeX = @"";
+    if(op.touchesEnded.x - op.touchesBegan.x >0){
+        //手指至左往右滑动
+        swipeCodeX =[NSString stringWithFormat:@"\n\
+         driver.scrollRight();\n"];
+    }else if(op.touchesEnded.x - op.touchesBegan.x < 0){
+        //手指至右往左滑动
+        swipeCodeX =[NSString stringWithFormat:@"\n\
+         driver.scrollLeft();\n"];
+    }
+    [self storeProductCode:swipeCodeX];
 }
 
 - (void)produceTemplateCodeOnce {

@@ -7,7 +7,8 @@
 //
 
 #import "IQUITestDebugKeyValueModel.h"
-#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
+//#import "IQUITestCodeMakerGenerator.h"
 
 @class IQCapabilities;
 
@@ -63,7 +64,7 @@ static NSString *const kCapabilitiesKey = @"kCapabilitiesKey";
 @implementation IQUITestDebugKVModel
 
 - (void)updateLocalCap {
-    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    IQUITestCodeMakerService *persistent = [IQUITestCodeMakerService sharePersistent];
     [persistent handleCapChangeTaskWithKey:self.title value:self.placeholder];
 }
 

@@ -7,7 +7,8 @@
 //
 
 #import "IQUITestDebugScriptModel.h"
-#import "IQUITestCodeMakerGenerator.h"
+//#import "IQUITestCodeMakerGenerator.h"
+#import "IQUITestCodeMakerService.h"
 #import "IQUITestCodeMakerCapabilities.h"
 #import "IQUITestCodeMakerFactory.h"
 
@@ -28,7 +29,7 @@
 - (void)handleSegmentControlSelected:(NSInteger)selectIndex withCallBack:(IQHandleScriptBlock)cabllBack {
     /*update local cap cache*/
     NSArray * items = @[@"Totoro",@"Appium"];
-    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    IQUITestCodeMakerService *persistent = [IQUITestCodeMakerService sharePersistent];
     [persistent handleConvertTaskWithIdentifier:items[selectIndex]];
     
     if (cabllBack) {

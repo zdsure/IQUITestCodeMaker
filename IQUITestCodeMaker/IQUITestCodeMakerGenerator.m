@@ -18,17 +18,17 @@
 #import "GCDWebServer.h"
 
 static IQUITestCodeMakerGenerator *persistent = nil;
-static NSString *const kAutoSetIdentifier   = @"[A]";
-static NSString *const kManualIdentifier    = @"[M]";
-
-static NSString *const kViewHierarchy       = @"VHierarchy";
-static NSString *const kViewTag             = @"VTag";
-static NSString *const kViewIvarName        = @"VIvar";
-static NSString *const kViewText            = @"VText";
-static NSString *const kViewTitle           = @"VTitle";
-static NSString *const kViewImageName       = @"VImage";
-static NSString *const kViewSection         = @"VSection";
-static NSString *const kViewIndexRow        = @"VRow";
+//static NSString *const kAutoSetIdentifier   = @"[A]";
+//static NSString *const kManualIdentifier    = @"[M]";
+//
+//static NSString *const kViewHierarchy       = @"VHierarchy";
+//static NSString *const kViewTag             = @"VTag";
+//static NSString *const kViewIvarName        = @"VIvar";
+//static NSString *const kViewText            = @"VText";
+//static NSString *const kViewTitle           = @"VTitle";
+//static NSString *const kViewImageName       = @"VImage";
+//static NSString *const kViewSection         = @"VSection";
+//static NSString *const kViewIndexRow        = @"VRow";
 
 static NSString *const kCapabilitiesKey = @"kCapabilitiesKey";
 
@@ -110,6 +110,7 @@ static NSMutableDictionary<NSString *, NSMutableSet<NSString *> *> *SwizzledClas
     
     return swizzledMethods;
 }
+
 static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 {
     NSCParameterAssert(viewClass && aSelector);
@@ -191,29 +192,74 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 
 @end
 
+#pragma mark--UITextView--
+@implementation UITextView (IQRunTimeHook)
+
++ (void)IQHook {
+    IQRuntimeMethodExchange([UITextView class], @selector(setDelegate:), @selector(IQ_setDelegate:));
+}
+
+- (void)IQ_setDelegate:(id<UITextViewDelegate>)delegate {
+    
+    [self IQ_setDelegate:delegate];
+    
+    
+    if (DebugView(NSStringFromClass([self class]))) {
+        return;
+    }
+    
+    if (![delegate respondsToSelector:@selector(textViewDidEndEditing:)]) {
+        return;
+    }
+    
+    Method originMethod = class_getInstanceMethod([delegate class], @selector(textViewDidEndEditing:));
+    IMP    originImp    = method_getImplementation(originMethod);
+    Method currentMethod = class_getInstanceMethod([self class], @selector(IQ_textViewDidEndEditing:));
+    IMP    currentImp    = method_getImplementation(currentMethod);
+    
+    class_addMethod([delegate class], @selector(IQ_textViewDidEndEditing:), currentImp, method_getTypeEncoding(currentMethod));
+    
+    BOOL didAddMethod = class_addMethod([delegate class], @selector(textViewDidEndEditing:), currentImp, method_getTypeEncoding(currentMethod));
+    
+    if (didAddMethod) {
+        class_replaceMethod([delegate class], @selector(IQ_textViewDidEndEditing:), originImp, method_getTypeEncoding(originMethod));
+    } else {
+        IQRuntimeMethodExchange([delegate class], @selector(textViewDidEndEditing:), @selector(IQ_textViewDidEndEditing:));
+    }
+    
+}
+
+- (void)IQ_textViewDidEndEditing:(UITextView *)textView {
+    [self IQ_textViewDidEndEditing:textView];
+    IQSendKeyTask(textView);
+}
+
+@end
+
 #pragma mark--UINavigationController--
 
 @implementation UINavigationController (IQRunTimeHook)
 
-//+ (void)IQHook {
-//    IQRuntimeMethodExchange([UINavigationController class], @selector(navigationBar:shouldPopItem:), @selector(IQ_navigationBar:shouldPopItem:));
-//}
-//
-//- (BOOL)IQ_navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item {
-//    BOOL ret = [self IQ_navigationBar:navigationBar shouldPopItem:item];
-//
-//#warning 系统自带导航需要在此截获事件
-//    UINavigationItem *backItem = navigationBar.backItem;
-//
-//    IQUITestOperationEvent *op = [IQUITestOperationEvent new];
-//    op.eventType = IQUIEventTap;
++ (void)IQHook {
+    IQRuntimeMethodExchange([UINavigationController class], @selector(navigationBar:shouldPopItem:), @selector(IQ_navigationBar:shouldPopItem:));
+}
+
+- (BOOL)IQ_navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item {
+    BOOL ret = [self IQ_navigationBar:navigationBar shouldPopItem:item];
+
+#warning 系统自带导航需要在此截获事件
+    UINavigationItem *backItem = navigationBar.backItem;
+
+    IQUITestOperationEvent *op = [IQUITestOperationEvent new];
+    op.eventType = IQUIEventTap;
 //    op.identifier= backItem.title;
-//
-//    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
-//    [persistent.factory produceCodeWithOperationEvent:op];
-//
-//    return ret;
-//}
+    op.identifier= backItem.accessibilityLabel;
+
+    IQUITestCodeMakerGenerator *persistent = [IQUITestCodeMakerGenerator sharePersistent];
+    [persistent.factory produceCodeWithOperationEvent:op];
+
+    return ret;
+}
 
 @end
 
@@ -458,7 +504,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 //#warning has problem !!! fix me !!!
 //    ImplementTouchMethodsIfNeeded([UIView class], @selector(touchesBegan:withEvent:));
 //}
-//
+
 //- (NSString *)IQ_accessibilityIdentifier {
 //    NSLog(@"========>%@",NSStringFromClass([self class]));
 //
@@ -545,7 +591,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 //    [self setAccessibilityIdentifier:identifierJsonFormat];
 //    return identifierJsonFormat;
 //}
-//
+
 //- (NSInteger)indexOfCurrentViewInSuperView:(UIView *)currentView {
 //
 //    NSInteger cursor= 0;
@@ -592,8 +638,8 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 //
 //        /**/
 //        NSInteger index = [self indexOfCurrentViewInSuperView:self];
-//        NSString *identifier = [NSString stringWithFormat:@"%@%@[%ld]",kAutoSetIdentifier,NSStringFromClass([gestureRecognizer.view class]),index];
-//        self.accessibilityIdentifier = identifier;
+////        NSString *identifier = [NSString stringWithFormat:@"%@%@[%ld]",kAutoSetIdentifier,NSStringFromClass([gestureRecognizer.view class]),index];
+////        self.accessibilityIdentifier = identifier;
 //
 //    }
 //}
@@ -730,17 +776,6 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 + (void)IQHook {
     IQRuntimeMethodExchange([UIScrollView class],@selector(setDelegate:),@selector(IQ_setDelegate:));
 }
-
-//- (void)setPstart:(CGPoint)pstart
-//{
-//    objc_setAssociatedObject(self, @selector(pstart), @(pstart), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//    
-//}
-//- (CGPoint)pstart
-//{
-//   NSValue *value = objc_getAssociatedObject(self, @selector(pstart));
-//   return [value CGPointValue];
-//}
     
 - (void)IQ_setDelegate:(id<UIScrollViewDelegate>)delegate {
     //避免业务代码里重复设置
@@ -759,10 +794,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         return;
     }
     
-    if (![delegate respondsToSelector:@selector(scrollViewWillBeginDragging:)]) {
-        return;
-    }
-    
+    //单例模式导致只会响应一次，所以需要重新添加委托
     if (delegate) {
         if ([[IQUITestCodeMakerGenerator sharePersistent].hashTable containsObject:(delegate.class)]) {
             [self IQ_setDelegate:delegate];
@@ -770,6 +802,11 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         } else {
             [[IQUITestCodeMakerGenerator sharePersistent].hashTable addObject:(delegate.class)];
         }
+    }
+    
+    //交换scrollViewWillBeginDragging
+    if (![delegate respondsToSelector:@selector(scrollViewWillBeginDragging:)]) {
+        return;
     }
     
     Method originMethod = class_getInstanceMethod([delegate class], @selector(scrollViewWillBeginDragging:));
@@ -788,7 +825,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
         IQRuntimeMethodExchange([delegate class], @selector(scrollViewWillBeginDragging:), @selector(IQ_scrollViewWillBeginDragging:));
     }
     
-    
+    //交换scrollViewDidEndDecelerating
     if (![delegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)]) {
         return;
     }
@@ -808,6 +845,27 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     } else {
         IQRuntimeMethodExchange([delegate class], @selector(scrollViewDidEndDecelerating:), @selector(IQ_scrollViewDidEndDecelerating:));
     }
+    
+    //交换scrollViewDidEndDragging
+    if (![delegate respondsToSelector:@selector(scrollViewDidEndDragging:)]) {
+        return;
+    }
+    
+    Method originMethod2 = class_getInstanceMethod([delegate class], @selector(scrollViewDidEndDragging:));
+    IMP originImp2 = method_getImplementation(originMethod2);
+    
+    Method currentMethod2 = class_getInstanceMethod([self class], @selector(IQ_scrollViewDidEndDragging:));
+    IMP currentImp2 = method_getImplementation(currentMethod2);
+    
+    class_addMethod([delegate class], @selector(IQ_scrollViewDidEndDragging:), currentImp2, method_getTypeEncoding(currentMethod2));
+    
+    BOOL didAddMethod2 = class_addMethod([delegate class], @selector(scrollViewDidEndDragging:), currentImp2, method_getTypeEncoding(currentMethod2));
+    
+    if (didAddMethod2) {
+        class_replaceMethod([delegate class], @selector(IQ_scrollViewDidEndDragging:), originImp2, method_getTypeEncoding(originMethod2));
+    } else {
+        IQRuntimeMethodExchange([delegate class], @selector(scrollViewDidEndDragging:), @selector(IQ_scrollViewDidEndDragging:));
+    }
 }
 
 - (void)IQ_scrollViewWillBeginDragging:(UIScrollView *)scrollView {
@@ -823,15 +881,27 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
     if (scrollToScrollStop) {
         NSValue *value = objc_getAssociatedObject(self, @selector(IQ_scrollViewWillBeginDragging:));
         CGPoint pStart =  [value CGPointValue];
-        
         CGPoint pEnd = [scrollView contentOffset];
         
         IQSwipeTask(pStart, pEnd);
     }
 }
 
+- (void)IQ_scrollViewDidEndDragging:(UIScrollView *)scrollView {
+    [self IQ_scrollViewDidEndDragging:scrollView];
+    // 手指接触停止
+    BOOL scrollToScrollStop = scrollView.tracking && !scrollView.dragging && !scrollView.decelerating;
+    if (scrollToScrollStop) {
+        NSValue *value = objc_getAssociatedObject(self, @selector(IQ_scrollViewWillBeginDragging:));
+        CGPoint pStart =  [value CGPointValue];
+        CGPoint pEnd = [scrollView contentOffset];
+        
+        IQSwipeTask(pStart, pEnd);
+    }
+}
 
 @end
+
 
 #pragma mark--UICollectionView--
 
@@ -940,36 +1010,115 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 
 @implementation UIApplication (IQRunTimeHook)
 
+//+ (void)IQHook {
+//    IQRuntimeMethodExchange([UIApplication class], @selector(sendAction:to:from:forEvent:), @selector(IQ_sendAction:to:from:forEvent:));
+//    IQRuntimeMethodExchange([UIApplication class], @selector(sendEvent:), @selector(IQ_sendEvent:));
+//}
+//
+//- (void)IQ_sendEvent:(UIEvent *)event {
+//    [self IQ_sendEvent:event];
+//
+//}
+//
+//- (BOOL)IQ_sendAction:(SEL)action to:(id)target from:(id)sender forEvent:(UIEvent *)event {
+//    BOOL ret = [self IQ_sendAction:action to:target from:sender forEvent:event];
+//    if (DebugView(NSStringFromClass([sender class]))) {
+//        return ret;
+//    }
+//    /*白名单，系统返回按钮已在should：popItem中拦截*/
+//    if ([sender isKindOfClass:NSClassFromString(@"_UIButtonBarButton")]){
+//        return ret;
+//    }
+//
+//    if ([NSStringFromSelector(action) isEqualToString:@"sendNext:"]) {
+//        return ret;
+//    }
+//    IQTapTask(sender);
+//
+////    if ([NSStringFromSelector(action) isEqualToString:@"rac_commandPerformAction:"]) {
+////        return ret;
+////    }
+//
+//    return ret;
+//}
+
+@end
+
+#pragma mark--UIWindow--
+
+@implementation UIWindow (IQRunTimeHook)
+
 + (void)IQHook {
-    IQRuntimeMethodExchange([UIApplication class], @selector(sendAction:to:from:forEvent:), @selector(IQ_sendAction:to:from:forEvent:));
-    IQRuntimeMethodExchange([UIApplication class], @selector(sendEvent:), @selector(IQ_sendEvent:));
+    IQRuntimeMethodExchange([UIWindow class], @selector(sendEvent:), @selector(IQ_sendEvent:));
 }
 
 - (void)IQ_sendEvent:(UIEvent *)event {
+    [self handleUIEvent:event];
     [self IQ_sendEvent:event];
     
 }
 
-- (BOOL)IQ_sendAction:(SEL)action to:(id)target from:(id)sender forEvent:(UIEvent *)event {
-    BOOL ret = [self IQ_sendAction:action to:target from:sender forEvent:event];
-    if (DebugView(NSStringFromClass([sender class]))) {
-        return ret;
-    }
-    /*白名单，系统返回按钮已在should：popItem中拦截*/
-    if ([sender isKindOfClass:NSClassFromString(@"_UIButtonBarButton")]){
-        return ret;
+- (void)handleUIEvent:(UIEvent *)event {
+    if (event.type != UIEventTypeTouches) return;
+    
+    NSSet *allTouches = [event allTouches];
+    UITouch *touch = (UITouch *)[allTouches anyObject];
+    
+    if (!touch.view) {
+        return;
     }
     
-    if ([NSStringFromSelector(action) isEqualToString:@"sendNext:"]) {
-        return ret;
+    if(DebugView(NSStringFromClass([touch.view class]))){
+        return;
     }
-    IQTapTask(sender);
     
-//    if ([NSStringFromSelector(action) isEqualToString:@"rac_commandPerformAction:"]) {
-//        return ret;
-//    }
+    switch (touch.phase) {
+        case UITouchPhaseBegan: {
+            UIView *touchedView = touch.view;
+            NSString *className = NSStringFromClass([touchedView class]);
+            if ([className containsString:@"UIWeb"]) {
+                CGPoint touchPoint = [touch locationInView:touch.view.window];
+                IQTapTaskWithLocation(touchPoint);
+            } else {
+                id target = touchedView;
+                IQTapTask(target);
+            }
+            break;
+        }
+            
+        case UITouchPhaseCancelled: {
+            break;
+        }
+            
+        case UITouchPhaseEnded: {
+            UIView *touchedView = touch.view;
+//            if (self.justCareHittestView) {
+//                touchedView = [touch.view.window cnHitTest: [touch locationInView:touch.view.window] withEvent:event];
+//            } else {
+//                //WXTextView往上偏移
+//                if ([NSStringFromClass([touchedView class]) isEqualToString:@"WXTextView"]) {
+//                    touchedView = touchedView.superview;
+//                }
+//                //没有手势动作的WXView没有意义
+//                while ([touchedView isKindOfClass:NSClassFromString(@"WXView")]) {
+//                    if (!touchedView.gestureRecognizers) {
+//                        touchedView = touchedView.superview;
+//                    } else {
+//                        break;
+//                    }
+//                }
+//            }
+            break;
+        }
+            
+        case UITouchPhaseMoved: {
+            break;
+        }
+            
+        default:
+            break;
+    }
     
-    return ret;
 }
 
 @end
@@ -995,7 +1144,8 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 }
 
 - (void)hook {
-    [UIApplication IQHook];
+    [UIWindow IQHook];
+//    [UIApplication IQHook];
 //    [UITableView IQHook];
 //    [UICollectionView IQHook];
 //    [UIGestureRecognizer IQHook];
@@ -1003,6 +1153,7 @@ static void ImplementTouchMethodsIfNeeded(Class viewClass, SEL aSelector)
 //    [UIImage IQHook];
 //    [UINavigationController IQHook];
     [UITextField IQHook];
+    [UITextView IQHook];
     [UIScrollView IQHook];
 }
 

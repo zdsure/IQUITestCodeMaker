@@ -70,7 +70,7 @@
     }
     self.eventIndex++;
     NSString *tapCode = [NSString stringWithFormat:@"\n\
-         WebElement el%ld = driver.findElementByAccessibilityId(\"%@\");\n\
+         WebElement el%ld = driver.findElementByIdWithoutExp(\"%@\");\n\
          el%ld.click();\n",self.eventIndex,op.identifier,self.eventIndex];
     [self storeProductCode:tapCode];
 }
@@ -80,12 +80,32 @@
         [self.eventQueue addObject:op];
     }
     self.eventIndex++;
-    NSString *swipeCode = [NSString stringWithFormat:@"\n\
-         driver.drag(%f,%f,%f,%f);\n",
-         op.touchesBegan.x ,op.touchesBegan.y,op.touchesEnded.x,op.touchesEnded.y];
 //    NSString *swipeCode = [NSString stringWithFormat:@"\n\
-//                           driver.drag();\n"];
-    [self storeProductCode:swipeCode];
+//         driver.drag(%f,%f,%f,%f);\n",
+//         op.touchesBegan.x ,op.touchesBegan.y,op.touchesEnded.x,op.touchesEnded.y];
+    NSString *swipeCodeY = @"";
+    if(op.touchesEnded.y - op.touchesBegan.y >0){
+        //手指至下往上滑动
+        swipeCodeY =[NSString stringWithFormat:@"\n\
+        driver.scrollUp();\n"];
+    }else if(op.touchesEnded.y - op.touchesBegan.y < 0){
+        //手指至上往下滑动
+        swipeCodeY =[NSString stringWithFormat:@"\n\
+        driver.scrollDown();\n"];
+    }
+    [self storeProductCode:swipeCodeY];
+    
+    NSString *swipeCodeX = @"";
+    if(op.touchesEnded.x - op.touchesBegan.x >0){
+        //手指至左往右滑动
+        swipeCodeX =[NSString stringWithFormat:@"\n\
+        driver.scrollRight();\n"];
+    }else if(op.touchesEnded.x - op.touchesBegan.x < 0){
+        //手指至右往左滑动
+        swipeCodeX =[NSString stringWithFormat:@"\n\
+        driver.scrollLeft();\n"];
+    }
+    [self storeProductCode:swipeCodeX];
 }
 
 - (void)produceSendKeyCodeWithOperationEvent:(IQUITestOperationEvent *)op {
@@ -94,7 +114,7 @@
     }
     self.eventIndex++;
     NSString *sendCode = [NSString stringWithFormat:@"\n\
-        WebElement el%ld = driver.findElementByAccessibilityId(\"%@\");\n\
+        WebElement el%ld = driver.findElementByIdWithoutExp(\"%@\");\n\
         el%ld.sendKeys(\"%@\");\n",self.eventIndex,op.identifier,self.eventIndex,op.value];
     [self storeProductCode:sendCode];
 }
